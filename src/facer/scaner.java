@@ -32,7 +32,8 @@ public class scaner implements Runnable
             }
         int imwidth = img.getWidth();
         int imheight= img.getHeight();
-
+        
+        //conver to greyscale
         for (int i =0;i<imwidth;i++)
             for (int j =0;j<imheight;j++)
             {
@@ -44,7 +45,38 @@ public class scaner implements Runnable
               img.setRGB(i,j, newcol.getRGB());
                 
             }
-  
+        //find gradient
+         float grad[][] = new float[imwidth][imheight];
+         float surr=0;
+         float max=0;
+         for (int i =0;i<imwidth;i++)
+            for (int j =0;j<imheight;j++)
+            {
+              Color  col = new Color(img.getRGB(i, j));
+              int val = (int)(col.getRed());
+              if( i>=1 && i<=imwidth-2 && j>=1 && j<=imheight-2)
+              {
+                 surr = new Color(img.getRGB(i-1,j-1)).getRed()+new Color(img.getRGB(i-1,j)).getRed()+new Color(img.getRGB(i-1,j+1)).getRed();
+                 surr +=new Color(img.getRGB(i,j-1)).getRed()+new Color(img.getRGB(i,j+1)).getRed();
+                 surr += new Color(img.getRGB(i+1,j-1)).getRed()+new Color(img.getRGB(i+1,j)).getRed()+new Color(img.getRGB(i+1,j+1)).getRed();
+                 grad[i][j] = 8*val-(surr);
+              }
+              max = (max<grad[i][j])?grad[i][j]:max;
+              
+                
+            }
+        //normalise
+        for (int i =0;i<imwidth;i++)
+            for (int j =0;j<imheight;j++)
+            {
+               grad[i][j] /= max;
+               if(grad[i][j]>0.6)
+               {
+                    Color newcol = new Color(250,0,0);
+                    img.setRGB(i,j, newcol.getRGB());
+                   
+               }
+            }
         
         ImageIcon icon = new ImageIcon(img);
         JLabel label1 = new JLabel();
